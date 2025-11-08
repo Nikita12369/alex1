@@ -318,66 +318,104 @@ drawManualDividers();
 </script>
 <script>
 let currentDayId = 1;
-let dayNames = {};
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadDayNames();
-  generateDayButtons();
-  loadSeatsForDay(currentDayId);
-});
 
-async function loadDayNames() {
-  const res = await fetch('/api/days');
-  const days = await res.json();
-  dayNames = {};
-  days.forEach(day => {
-    dayNames[day.id] = day.name;
+// Загрузка мест при выборе дня
+async function loadSeatsForDay(dayId) {
+  currentDayId = dayId;
+
+  // Получаем все места с сервера для этого дня
+  const res = await fetch(`/api/seats/${dayId}`);
+  const seats = await res.json();
+
+  // Обновляем статус DOM
+  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
+
+  seats.forEach(seat => {
+    const seatDiv = seatElements[seat.id];
+    if (seatDiv) {
+      seatDiv.classList.toggle('booked', seat.taken);
+      seatDiv.onclick = async () => {
+        // Блокируем кнопку сразу
+        seatDiv.onclick = null;
+
+        const res = await fetch(`/api/book/${dayId}/${seat.id}`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        if (!data.success) {
+          alert('Ошибка бронирования');
+          seatDiv.onclick = arguments.callee; // возвращаем обработчик
+        }
+      };
+    }
   });
 }
 
-function generateDayButtons() {
+// Инициализация seatElements при первой загрузке арены
+document.querySelectorAll('.seat').forEach(seat => {
+  const seatId = parseInt(seat.title.replace('Место ', ''));
+  seatElements[seatId] = seat;
+});
+
+// События WebSocket
+socket.on('seat-updated', ({ id, taken, dayId }) => {
+  if (dayId !== currentDayId) return; // обновляем только текущий день
+  const seat = seatElements[id];
+  if (seat) seat.classList.toggle('booked', taken);
+});
+
+socket.on('seats-reset', ({ dayId }) => {
+  if (dayId !== currentDayId) return;
+  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
+});
+
+// Кнопка сброса
+document.getElementById('reset-button').onclick = async () => {
+  if (confirm('Очистить все брони?')) {
+    await fetch(`/api/reset/${currentDayId}`, { method: 'POST' });
+  }
+};
+
+// Генерация кнопок дней
+async function loadDayNames() {
+  const res = await fetch('/api/days');
+  const days = await res.json();
   const container = document.getElementById('days-container');
   container.innerHTML = '';
-  for (let i = 1; i <= 15; i++) {
+  days.forEach(day => {
     const btn = document.createElement('button');
     btn.className = 'tab-button';
-    btn.textContent = dayNames[i] || `День ${i}`;
+    btn.textContent = day.name;
     btn.onclick = () => {
-      currentDayId = i;
-      document.getElementById('day-title').textContent = btn.textContent;
-      loadSeatsForDay(currentDayId);
+      document.getElementById('day-title').textContent = day.name;
+      loadSeatsForDay(day.id);
     };
     container.appendChild(btn);
-  }
+  });
 }
 
+// Переименование дня
 async function renameDay() {
-  const newName = document.getElementById('rename-input').value;
-  if (!newName.trim()) return alert('Введите название');
+  const newName = document.getElementById('rename-input').value.trim();
+  if (!newName) return alert('Введите название');
   await fetch(`/api/rename-day/${currentDayId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: newName })
   });
   await loadDayNames();
-  generateDayButtons();
   document.getElementById('day-title').textContent = newName;
 }
 
-async function loadSeatsForDay(dayId) {
-  const res = await fetch(`/api/seats/${dayId}`);
-  const seats = await res.json();
-
-  // Удаляем все бронь
-  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
-
-  // Устанавливаем бронь из базы
-  seats.forEach(seat => {
-    const seatDiv = document.querySelector(`.seat[title="Место ${seat.seat_id}"]`);
-    if (seatDiv) seatDiv.classList.add('booked');
-  });
-}
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadDayNames();
+  loadSeatsForDay(currentDayId);
+  socket.emit('get-seats', currentDayId);
+});
 </script>
+
 
 
 
