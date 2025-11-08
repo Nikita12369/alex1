@@ -1,4 +1,385 @@
 <!DOCTYPE html>
+<html lang="ru">
 <head>
-    <meta charset="utf8">sd
+  <meta charset="UTF-8">
+  <title>Цирковая арена</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: #eee;
+      margin: 20px;
+      text-align: center;
+    }
+    #arena {
+      position: relative;
+      width: 800px;
+      height: 800px;
+      margin: 0 auto;
+      background: radial-gradient(circle at center, #333 60%, #111 100%);
+      border-radius: 50%;
+      box-shadow: inset 0 0 40px #000;
+    }
+    .seat {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid #000;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+    .rank-1 { background-color: #cc2222; }
+    .rank-2 { background-color: #004cff; }
+    .rank-3 { background-color: #229922; }
+    .booked { background-color: yellow !important; border-color: goldenrod !important; }
+    #center {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      top: 250px;
+      left: 250px;
+      background: #eee;
+      border-radius: 50%;
+      line-height: 300px;
+      text-align: center;
+      color: #333;
+      font-weight: bold;
+    }
+    #backstage, #entrance {
+      position: absolute;
+      width: 140px;
+      height: 30px;
+      background: #444;
+      color: white;
+      line-height: 30px;
+      text-align: center;
+      font-size: 14px;
+      border-radius: 6px;
+    }
+    #backstage { top: 20px; left: 330px; }
+    #entrance { bottom: 20px; left: 330px; }
+
+    .divider {
+      position: absolute;
+      background: #555;
+      z-index: 1;
+      border-radius: 4px;
+      opacity: 0.8;
+    }
+    .backstage {
+      top: 0;
+      left: 250px;
+      width: 300px;
+      height: 30px;
+    }
+    .entrance {
+      bottom: 0;
+      left: 250px;
+      width: 300px;
+      height: 30px;
+    }
+    .sector-divider {
+      position: absolute;
+      width: 2px;
+      height: 150px; /* длина полоски */
+      background: #888;
+      z-index: 2;
+      opacity: 0.6;
+      transform-origin: top center;
+    }
+    .divider-line {
+      position: absolute;
+      width: 3px;
+      height: 100px; /* можно менять длину */
+      background: #888;
+      z-index: 2;
+      opacity: 0.7;
+    }
+
+  #tabs {
+    margin-bottom: 20px;
+  }
+  .tab-button {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .tab-button.active {
+    background: #cc2222;
+  }
+
+
+
+  </style>
 </head>
+<body>
+  <h1>Цирковая арена</h1>
+  <div id="arena">
+    <div id="center">Манеж</div>
+    <div id="backstage">Закулисье</div>
+    <div id="entrance">Вход</div>
+  </div>
+
+  <div id="tabs">
+    <button id="reset-button" class="tab-button" style="background:#777;">Рестарт</button>
+  </div>
+
+  <div id="days-container" style="margin-bottom: 20px;">
+  <!-- Кнопки генерируются скриптом -->
+</div>
+
+<h2 id="day-title">День 1</h2>
+<input type="text" id="rename-input" placeholder="Новое название дня" />
+<button onclick="renameDay()">Переименовать</button>
+
+
+
+
+  <script>
+    const arena = document.getElementById('arena');
+    const seatMap = {};
+
+    const cx = 400;
+    const cy = 400; // немного выше центра
+
+    function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, idStart) {
+      let id = idStart;
+      for (let r = 0; r < rows; r++) {
+        const rad = radius + r * ringSpacing;
+        const count = Math.floor((end - start) * rad / seatSpacing);
+        const step = (end - start) / count;
+        for (let i = 0; i < count; i++) {
+          const angle = start + i * step;
+          const x = cx + rad * Math.cos(angle) - 9;
+          const y = cy + rad * Math.sin(angle) - 9;
+
+          // Пропуск зоны закулисья
+          if (y < 100) continue;
+
+          const seat = document.createElement('div');
+          seat.className = `seat ${rank}`;
+          seat.style.left = `${x}px`;
+          seat.style.top = `${y}px`;
+          seat.title = `Место ${id}`;
+
+          seat.onclick = async () => {
+          const seatId = id;
+
+          if (seat.classList.contains('booked')) {
+            if (confirm('Снять бронь с этого места?')) {
+              seat.classList.remove('booked');
+              await updateBookingOnServer(seatId, false);
+            }
+          } else {
+            seat.classList.add('booked');
+            await updateBookingOnServer(seatId, true);
+          }
+        };
+
+
+          arena.appendChild(seat);
+          id++;
+        }
+      }
+      return id;
+    }
+
+      let id = 1;
+
+      // Левая часть круга (0°–135°)
+      id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);
+      // Правая часть круга (225°–360°)
+      id = drawArcSeats('rank-1', 170, Math.PI * 1.75, Math.PI * 2, 2, 20, 20, id);
+
+
+
+      // Rank 2 (Sperrsitz) — Жёлтые, ближе и плотнее, 6 секторов
+      id = drawArcSeats('rank-2', 230, Math.PI * -0.13, Math.PI * 0.10, 5, 18, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.10, Math.PI * 0.157, 5, 18, 20, id);
+
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.2, Math.PI * 0.42, 5, 18, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.60, Math.PI * 0.82, 5, 18, 20, id);
+
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.872, Math.PI * 0.9, 5, 20, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.90, Math.PI * 1.15, 5, 20, 20, id);
+
+      // Rank 3 (Rang A) — Зелёные, выше и ближе
+      // Rank 3 (Rang A) — Зелёные, слева и справа сверху
+      id = drawArcSeats('rank-3', 240, Math.PI * 1.2, Math.PI * 1.38, 5, 20, 20, id); // Левый верх
+      id = drawArcSeats('rank-3', 240, Math.PI * 1.65, Math.PI * 1.83, 5, 20, 20, id); // Правый верх
+
+
+      
+      function drawManualDividers() {
+  const dividers = [
+    // Между жёлтыми секторами
+    { x: 165, y: 483, rotate: 240 }, // 1-2 слева
+    { x: 165, y: 218, rotate: 120 },   // 2-3 желтый зелёный слева
+    { x: 300, y: 90, rotate: 160 },  // закулисье слева
+    { x: 505, y: 90, rotate: 200 },  // закулисье справа
+    { x: 635, y: 218, rotate: 65 },  // желтый зелёный справа
+    { x: 635, y: 483, rotate: -240 }, // желтый справа
+
+    { x: 335, y: 610, rotate: 15 }, // слева сход
+    { x: 465, y: 610, rotate: -15 },  // правый вход
+  ];
+
+  dividers.forEach(d => {
+    const line = document.createElement('div');
+    line.className = 'divider-line';
+    line.style.left = `${d.x}px`;
+    line.style.top = `${d.y}px`;
+    line.style.transform = `rotate(${d.rotate}deg)`;
+    arena.appendChild(line);
+  });
+}
+
+drawManualDividers();
+</script>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const resetBtn = document.getElementById('reset-button');
+
+  // Все места, чтобы потом работать с DOM
+  const seatElements = {};
+
+  // Получение всех мест от сервера при подключении
+  socket.on('seats-data', (seats) => {
+    seats.forEach(seat => {
+      const seatDiv = document.querySelector(`.seat[title="Место ${seat.id}"]`);
+      if (seatDiv) {
+        seatElements[seat.id] = seatDiv;
+        if (seat.taken) {
+          seatDiv.classList.add('booked');
+        } else {
+          seatDiv.classList.remove('booked');
+        }
+
+        seatDiv.onclick = async () => {
+          const isBooked = seatDiv.classList.contains('booked');
+          const confirmText = isBooked
+            ? 'Снять бронь с этого места?'
+            : 'Забронировать это место?';
+
+          if (!isBooked || confirm(confirmText)) {
+            const res = await fetch(`/api/book/${seat.id}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ taken: !isBooked })
+            });
+            const data = await res.json();
+            if (!res.ok) alert(data.message || 'Ошибка');
+          }
+        };
+      }
+    });
+  });
+
+  // Обновление одного места
+  socket.on('seat-updated', ({ id, taken }) => {
+    const seat = seatElements[id];
+    if (seat) {
+      seat.classList.toggle('booked', taken);
+    }
+  });
+
+  // Сброс всех мест
+  socket.on('seats-reset', () => {
+    Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
+  });
+
+  // Кнопка сброса
+  resetBtn.onclick = async () => {
+    if (confirm('Очистить все брони?')) {
+      await fetch('/api/reset', { method: 'POST' });
+    }
+  };
+
+
+  async function updateBookingOnServer(seatId, take) {
+  try {
+    await fetch(`/api/book/${seatId}`, {
+      method: 'POST'
+    });
+  } catch (err) {
+    console.error('Ошибка бронирования:', err);
+  }
+}
+
+</script>
+<script>
+let currentDayId = 1;
+let dayNames = {};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadDayNames();
+  generateDayButtons();
+  loadSeatsForDay(currentDayId);
+});
+
+async function loadDayNames() {
+  const res = await fetch('/api/days');
+  const days = await res.json();
+  dayNames = {};
+  days.forEach(day => {
+    dayNames[day.id] = day.name;
+  });
+}
+
+function generateDayButtons() {
+  const container = document.getElementById('days-container');
+  container.innerHTML = '';
+  for (let i = 1; i <= 15; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'tab-button';
+    btn.textContent = dayNames[i] || `День ${i}`;
+    btn.onclick = () => {
+      currentDayId = i;
+      document.getElementById('day-title').textContent = btn.textContent;
+      loadSeatsForDay(currentDayId);
+    };
+    container.appendChild(btn);
+  }
+}
+
+async function renameDay() {
+  const newName = document.getElementById('rename-input').value;
+  if (!newName.trim()) return alert('Введите название');
+  await fetch(`/api/rename-day/${currentDayId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: newName })
+  });
+  await loadDayNames();
+  generateDayButtons();
+  document.getElementById('day-title').textContent = newName;
+}
+
+async function loadSeatsForDay(dayId) {
+  const res = await fetch(`/api/seats/${dayId}`);
+  const seats = await res.json();
+
+  // Удаляем все бронь
+  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
+
+  // Устанавливаем бронь из базы
+  seats.forEach(seat => {
+    const seatDiv = document.querySelector(`.seat[title="Место ${seat.seat_id}"]`);
+    if (seatDiv) seatDiv.classList.add('booked');
+  });
+}
+</script>
+
+
+
+</body>
+</html>
