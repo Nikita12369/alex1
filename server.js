@@ -1,8 +1,8 @@
-const express = require('express');
-const path = require('path');
-const { Pool } = require('pg');
-const http = require('http');
-const socketIO = require('socket.io');
+const express = import('express');
+const path = import('path');
+const { Pool } = import('pg');
+const http = import('http');
+const socketIO = import('socket.io');
 
 const app = express();
 const server = http.createServer(app);
