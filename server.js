@@ -80,7 +80,7 @@ app.post('/api/book/:dayId/:id', async (req, res) => {
     return res.status(404).json({ message: 'Место не найдено' });
 
   const isTaken = result.rows[0].taken;
-  const update = await pool.query(
+  await pool.query(
     'UPDATE seats SET taken = $1 WHERE id = $2 AND day_id = $3 RETURNING *',
     [!isTaken, seatId, dayId]
   );
@@ -89,10 +89,6 @@ app.post('/api/book/:dayId/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/days', async (req, res) => {
-  const result = await pool.query('SELECT * FROM days ORDER BY id');
-  res.json(result.rows);
-});
 
 app.post('/api/rename-day/:id', async (req, res) => {
   const dayId = parseInt(req.params.id);
