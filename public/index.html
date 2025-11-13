@@ -141,66 +141,92 @@
 
 
 
-  <script>
+<script>
     const arena = document.getElementById('arena');
-const seatElements = {};
-let currentDayId = 1;
-const cx = 400;
-const cy = 400; // centrum areny
+    const seatMap = {};
 
-// Funkcja rysująca miejsca w łukach (arena taka jak wcześniej)
-function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, idStart) {
-  let id = idStart;
-  for (let r = 0; r < rows; r++) {
-    const rad = radius + r * ringSpacing;
-    const count = Math.floor((end - start) * rad / seatSpacing);
-    const step = (end - start) / count;
-    for (let i = 0; i < count; i++) {
-      const angle = start + i * step;
-      const x = cx + rad * Math.cos(angle) - 9;
-      const y = cy + rad * Math.sin(angle) - 9;
+    const cx = 400;
+    const cy = 400; // немного выше центра
 
-      if (y < 100) continue; // pomiń backstage
+    function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, idStart) {
+      let id = idStart;
+      for (let r = 0; r < rows; r++) {
+        const rad = radius + r * ringSpacing;
+        const count = Math.floor((end - start) * rad / seatSpacing);
+        const step = (end - start) / count;
+        for (let i = 0; i < count; i++) {
+          const angle = start + i * step;
+          const x = cx + rad * Math.cos(angle) - 9;
+          const y = cy + rad * Math.sin(angle) - 9;
 
-      const seat = document.createElement('div');
-      seat.className = `seat ${rank}`;
-      seat.style.left = `${x}px`;
-      seat.style.top = `${y}px`;
-      seat.title = `Miejsce ${id}`;
-      arena.appendChild(seat);
-      seatElements[id] = seat;
-      id++;
-    }
-  }
-  return id;
-}
+          // Пропуск зоны закулисья
+          if (y < 100) continue;
 
-// Rysowanie całej areny
-let id = 1;
-id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);     // lewa część
-id = drawArcSeats('rank-1', 170, Math.PI * 1.75, Math.PI * 2, 2, 20, 20, id); // prawa część
+          const seat = document.createElement('div');
+          seat.className = `seat ${rank}`;
+          seat.style.left = `${x}px`;
+          seat.style.top = `${y}px`;
+          seat.title = `Место ${id}`;
 
-id = drawArcSeats('rank-2', 230, Math.PI * -0.13, Math.PI * 0.10, 5, 18, 20, id);
-id = drawArcSeats('rank-2', 230, Math.PI * 0.10, Math.PI * 0.157, 5, 18, 20, id);
-id = drawArcSeats('rank-2', 230, Math.PI * 0.2, Math.PI * 0.42, 5, 18, 20, id);
-id = drawArcSeats('rank-2', 230, Math.PI * 0.60, Math.PI * 0.82, 5, 18, 20, id);
-id = drawArcSeats('rank-2', 230, Math.PI * 0.872, Math.PI * 0.9, 5, 20, 20, id);
-id = drawArcSeats('rank-2', 230, Math.PI * 0.90, Math.PI * 1.15, 5, 20, 20, id);
+          seat.onclick = async () => {
+          const seatId = id;
 
-id = drawArcSeats('rank-3', 240, Math.PI * 1.2, Math.PI * 1.38, 5, 20, 20, id);  // lewy górny
-id = drawArcSeats('rank-3', 240, Math.PI * 1.65, Math.PI * 1.83, 5, 20, 20, id); // prawy górny
+          if (seat.classList.contains('booked')) {
+            if (confirm('Снять бронь с этого места?')) {
+              seat.classList.remove('booked');
+              await updateBookingOnServer(seatId, false);
+            }
+          } else {
+            seat.classList.add('booked');
+            await updateBookingOnServer(seatId, true);
+          }
+        };
 
-// Rysowanie dividerów manualnych
-function drawManualDividers() {
+
+          arena.appendChild(seat);
+          id++;
+        }
+      }
+      return id;
+
+   let id = 1;
+
+      // Левая часть круга (0°–135°)
+      id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);
+      // Правая часть круга (225°–360°)
+      id = drawArcSeats('rank-1', 170, Math.PI * 1.75, Math.PI * 2, 2, 20, 20, id);
+
+
+
+      // Rank 2 (Sperrsitz) — Жёлтые, ближе и плотнее, 6 секторов
+      id = drawArcSeats('rank-2', 230, Math.PI * -0.13, Math.PI * 0.10, 5, 18, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.10, Math.PI * 0.157, 5, 18, 20, id);
+
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.2, Math.PI * 0.42, 5, 18, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.60, Math.PI * 0.82, 5, 18, 20, id);
+
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.872, Math.PI * 0.9, 5, 20, 20, id);
+      id = drawArcSeats('rank-2', 230, Math.PI * 0.90, Math.PI * 1.15, 5, 20, 20, id);
+
+      // Rank 3 (Rang A) — Зелёные, выше и ближе
+      // Rank 3 (Rang A) — Зелёные, слева и справа сверху
+      id = drawArcSeats('rank-3', 240, Math.PI * 1.2, Math.PI * 1.38, 5, 20, 20, id); // Левый верх
+      id = drawArcSeats('rank-3', 240, Math.PI * 1.65, Math.PI * 1.83, 5, 20, 20, id); // Правый верх
+
+
+      
+      function drawManualDividers() {
   const dividers = [
-    { x: 165, y: 483, rotate: 240 },
-    { x: 165, y: 218, rotate: 120 },
-    { x: 300, y: 90, rotate: 160 },
-    { x: 505, y: 90, rotate: 200 },
-    { x: 635, y: 218, rotate: 65 },
-    { x: 635, y: 483, rotate: -240 },
-    { x: 335, y: 610, rotate: 15 },
-    { x: 465, y: 610, rotate: -15 },
+    // Между жёлтыми секторами
+    { x: 165, y: 483, rotate: 240 }, // 1-2 слева
+    { x: 165, y: 218, rotate: 120 },   // 2-3 желтый зелёный слева
+    { x: 300, y: 90, rotate: 160 },  // закулисье слева
+    { x: 505, y: 90, rotate: 200 },  // закулисье справа
+    { x: 635, y: 218, rotate: 65 },  // желтый зелёный справа
+    { x: 635, y: 483, rotate: -240 }, // желтый справа
+
+    { x: 335, y: 610, rotate: 15 }, // слева сход
+    { x: 465, y: 610, rotate: -15 },  // правый вход
   ];
 
   dividers.forEach(d => {
@@ -212,20 +238,28 @@ function drawManualDividers() {
     arena.appendChild(line);
   });
 }
-drawManualDividers();
 
-// Socket.io
+drawManualDividers();
+</script>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
 const socket = io();
 
-// Funkcja wczytująca miejsca z bazy dla aktualnego dnia
+// Wczytanie miejsc dla danego dnia
+// Wczytywanie miejsc z bazy dla danego dnia
 async function loadSeatsForDay(dayId) {
   currentDayId = dayId;
   const res = await fetch(`/api/seats/${dayId}`);
   const seats = await res.json();
 
-  // reset klas booked
+  // Reset klas
+  // Reset klas booked
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
 
+  // Ustaw status z bazy
+  // Ustawienie statusu z bazy i przypisanie onclick
   seats.forEach(seat => {
     const seatDiv = seatElements[seat.id];
     if (!seatDiv) return;
@@ -233,74 +267,39 @@ async function loadSeatsForDay(dayId) {
 
     seatDiv.onclick = async () => {
       const isBooked = seatDiv.classList.contains('booked');
-      try {
-        const res = await fetch(`/api/book/${currentDayId}/${seat.id}`, { method: 'POST' });
-        const data = await res.json();
-        if (data.success) seatDiv.classList.toggle('booked', !isBooked);
-        else alert('Błąd rezerwacji');
-      } catch (err) {
-        console.error('Błąd:', err);
-      }
+      const res = await fetch(`/api/book/${dayId}/${seat.id}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        seatDiv.classList.toggle('booked', !isBooked);
+      } else {
+        alert('Błąd rezerwacji');
+
+        }
     };
   });
-}
-
-// WebSocket - aktualizacja miejsca
-socket.on('seat-updated', ({ id, taken, dayId }) => {
-  if (dayId !== currentDayId) return;
-  const seat = seatElements[id];
-  if (seat) seat.classList.toggle('booked', taken);
-});
-
-// WebSocket - reset
-socket.on('seats-reset', ({ dayId }) => {
-  if (dayId !== currentDayId) return;
-  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
-});
-
-// Reset button
-document.getElementById('reset-button').onclick = async () => {
-  if (confirm('Czy na pewno chcesz zresetować wszystkie rezerwacje tego dnia?')) {
-    await fetch(`/api/reset/${currentDayId}`, { method: 'POST' });
-  }
+@@ -297,7 +243,7 @@ <h2 id="day-title">День 1</h2>
 };
 
 // Generowanie 15 przycisków dni
-function loadDayButtons() {
+async function loadDayButtons() {
   const container = document.getElementById('days-container');
   container.innerHTML = '';
   for (let i = 1; i <= 15; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'tab-button';
-    btn.textContent = `Dzień ${i}`;
-    btn.onclick = () => {
-      document.getElementById('day-title').textContent = `Dzień ${i}`;
-      loadSeatsForDay(i);
-    };
-    container.appendChild(btn);
-  }
-}
-
-// Pseudo-pereinamowanie dnia
-async function renameDay() {
-  const newName = document.getElementById('rename-input').value.trim();
-  if (!newName) return alert('Wprowadź nazwę dnia');
-  await fetch(`/api/rename-day/${currentDayId}`, {
-    method: 'POST',
+@@ -321,17 +267,16 @@ <h2 id="day-title">День 1</h2>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: newName })
   });
-  loadDayButtons();
+  await loadDayButtons();
   document.getElementById('day-title').textContent = newName;
 }
 
 // Inicjalizacja przy starcie
-document.addEventListener('DOMContentLoaded', () => {
-  loadDayButtons();
-  loadSeatsForDay(currentDayId);
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadDayButtons();
+loadSeatsForDay(currentDayId);
   socket.emit('get-seats', currentDayId);
 });
-
+</script>
 <script>
 
 
