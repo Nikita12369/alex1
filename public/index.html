@@ -146,9 +146,9 @@
 const seatElements = {};
 let currentDayId = 1;
 const cx = 400;
-const cy = 400;
+const cy = 400; // centrum areny
 
-// Rysowanie miejsc (arena bez zmian)
+// Funkcja rysująca miejsca w łukach (arena taka jak wcześniej)
 function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, idStart) {
   let id = idStart;
   for (let r = 0; r < rows; r++) {
@@ -159,6 +159,7 @@ function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, 
       const angle = start + i * step;
       const x = cx + rad * Math.cos(angle) - 9;
       const y = cy + rad * Math.sin(angle) - 9;
+
       if (y < 100) continue; // pomiń backstage
 
       const seat = document.createElement('div');
@@ -176,30 +177,55 @@ function drawArcSeats(rank, radius, start, end, rows, ringSpacing, seatSpacing, 
 
 // Rysowanie całej areny
 let id = 1;
-id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);
-id = drawArcSeats('rank-1', 170, Math.PI * 1.75, Math.PI * 2, 2, 20, 20, id);
+id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);     // lewa część
+id = drawArcSeats('rank-1', 170, Math.PI * 1.75, Math.PI * 2, 2, 20, 20, id); // prawa część
+
 id = drawArcSeats('rank-2', 230, Math.PI * -0.13, Math.PI * 0.10, 5, 18, 20, id);
 id = drawArcSeats('rank-2', 230, Math.PI * 0.10, Math.PI * 0.157, 5, 18, 20, id);
 id = drawArcSeats('rank-2', 230, Math.PI * 0.2, Math.PI * 0.42, 5, 18, 20, id);
 id = drawArcSeats('rank-2', 230, Math.PI * 0.60, Math.PI * 0.82, 5, 18, 20, id);
 id = drawArcSeats('rank-2', 230, Math.PI * 0.872, Math.PI * 0.9, 5, 20, 20, id);
 id = drawArcSeats('rank-2', 230, Math.PI * 0.90, Math.PI * 1.15, 5, 20, 20, id);
-id = drawArcSeats('rank-3', 240, Math.PI * 1.2, Math.PI * 1.38, 5, 20, 20, id);
-id = drawArcSeats('rank-3', 240, Math.PI * 1.65, Math.PI * 1.83, 5, 20, 20, id);
+
+id = drawArcSeats('rank-3', 240, Math.PI * 1.2, Math.PI * 1.38, 5, 20, 20, id);  // lewy górny
+id = drawArcSeats('rank-3', 240, Math.PI * 1.65, Math.PI * 1.83, 5, 20, 20, id); // prawy górny
+
+// Rysowanie dividerów manualnych
+function drawManualDividers() {
+  const dividers = [
+    { x: 165, y: 483, rotate: 240 },
+    { x: 165, y: 218, rotate: 120 },
+    { x: 300, y: 90, rotate: 160 },
+    { x: 505, y: 90, rotate: 200 },
+    { x: 635, y: 218, rotate: 65 },
+    { x: 635, y: 483, rotate: -240 },
+    { x: 335, y: 610, rotate: 15 },
+    { x: 465, y: 610, rotate: -15 },
+  ];
+
+  dividers.forEach(d => {
+    const line = document.createElement('div');
+    line.className = 'divider-line';
+    line.style.left = `${d.x}px`;
+    line.style.top = `${d.y}px`;
+    line.style.transform = `rotate(${d.rotate}deg)`;
+    arena.appendChild(line);
+  });
+}
+drawManualDividers();
 
 // Socket.io
 const socket = io();
 
-// Wczytywanie miejsc z bazy dla danego dnia
+// Funkcja wczytująca miejsca z bazy dla aktualnego dnia
 async function loadSeatsForDay(dayId) {
   currentDayId = dayId;
   const res = await fetch(`/api/seats/${dayId}`);
   const seats = await res.json();
 
-  // Reset klas booked
+  // reset klas booked
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
 
-  // Ustawienie statusu z bazy i przypisanie onclick
   seats.forEach(seat => {
     const seatDiv = seatElements[seat.id];
     if (!seatDiv) return;
@@ -210,11 +236,8 @@ async function loadSeatsForDay(dayId) {
       try {
         const res = await fetch(`/api/book/${currentDayId}/${seat.id}`, { method: 'POST' });
         const data = await res.json();
-        if (data.success) {
-          seatDiv.classList.toggle('booked', !isBooked);
-        } else {
-          alert('Błąd rezerwacji');
-        }
+        if (data.success) seatDiv.classList.toggle('booked', !isBooked);
+        else alert('Błąd rezerwacji');
       } catch (err) {
         console.error('Błąd:', err);
       }
@@ -222,14 +245,14 @@ async function loadSeatsForDay(dayId) {
   });
 }
 
-// WebSocket update dla miejsc
+// WebSocket - aktualizacja miejsca
 socket.on('seat-updated', ({ id, taken, dayId }) => {
   if (dayId !== currentDayId) return;
   const seat = seatElements[id];
   if (seat) seat.classList.toggle('booked', taken);
 });
 
-// WebSocket reset
+// WebSocket - reset
 socket.on('seats-reset', ({ dayId }) => {
   if (dayId !== currentDayId) return;
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
