@@ -141,7 +141,7 @@
 
 
 
-<script>
+  <script>
     const arena = document.getElementById('arena');
     const seatMap = {};
 
@@ -188,8 +188,9 @@
         }
       }
       return id;
+    }
 
-   let id = 1;
+      let id = 1;
 
       // Левая часть круга (0°–135°)
       id = drawArcSeats('rank-1', 170, 0, Math.PI * 1.30, 2, 20, 20, id);
@@ -248,18 +249,15 @@ drawManualDividers();
 const socket = io();
 
 // Wczytanie miejsc dla danego dnia
-// Wczytywanie miejsc z bazy dla danego dnia
 async function loadSeatsForDay(dayId) {
   currentDayId = dayId;
   const res = await fetch(`/api/seats/${dayId}`);
   const seats = await res.json();
 
   // Reset klas
-  // Reset klas booked
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
 
   // Ustaw status z bazy
-  // Ustawienie statusu z bazy i przypisanie onclick
   seats.forEach(seat => {
     const seatDiv = seatElements[seat.id];
     if (!seatDiv) return;
@@ -273,11 +271,29 @@ async function loadSeatsForDay(dayId) {
         seatDiv.classList.toggle('booked', !isBooked);
       } else {
         alert('Błąd rezerwacji');
-
-        }
+      }
     };
   });
-@@ -297,7 +243,7 @@ <h2 id="day-title">День 1</h2>
+}
+
+// WebSocket update dla miejsc
+socket.on('seat-updated', ({ id, taken, dayId }) => {
+  if (dayId !== currentDayId) return;
+  const seat = seatElements[id];
+  if (seat) seat.classList.toggle('booked', taken);
+});
+
+// WebSocket reset
+socket.on('seats-reset', ({ dayId }) => {
+  if (dayId !== currentDayId) return;
+  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
+});
+
+// Reset button
+document.getElementById('reset-button').onclick = async () => {
+  if (confirm('Czy na pewno chcesz zresetować wszystkie rezerwacje tego dnia?')) {
+    await fetch(`/api/reset/${currentDayId}`, { method: 'POST' });
+  }
 };
 
 // Generowanie 15 przycisków dni
@@ -285,7 +301,23 @@ async function loadDayButtons() {
   const container = document.getElementById('days-container');
   container.innerHTML = '';
   for (let i = 1; i <= 15; i++) {
-@@ -321,17 +267,16 @@ <h2 id="day-title">День 1</h2>
+    const btn = document.createElement('button');
+    btn.className = 'tab-button';
+    btn.textContent = `Dzień ${i}`;
+    btn.onclick = () => {
+      document.getElementById('day-title').textContent = `Dzień ${i}`;
+      loadSeatsForDay(i);
+    };
+    container.appendChild(btn);
+  }
+}
+
+// Pseudo-pereinamowanie dnia
+async function renameDay() {
+  const newName = document.getElementById('rename-input').value.trim();
+  if (!newName) return alert('Wprowadź nazwę dnia');
+  await fetch(`/api/rename-day/${currentDayId}`, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: newName })
   });
@@ -296,10 +328,11 @@ async function loadDayButtons() {
 // Inicjalizacja przy starcie
 document.addEventListener('DOMContentLoaded', async () => {
   await loadDayButtons();
-loadSeatsForDay(currentDayId);
+  loadSeatsForDay(currentDayId);
   socket.emit('get-seats', currentDayId);
 });
 </script>
+
 <script>
 
 
