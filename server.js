@@ -61,9 +61,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/seats/:dayId', async (req, res) => {
   const dayId = parseInt(req.params.dayId);
   try {
-    const result = await pool.query('SELECT * FROM days ORDER BY id LIMIT 15');
+    const result = await pool.query(
+      'SELECT id, taken FROM seats WHERE day_id = $1 ORDER BY id',
+      [dayId]
+    );
     res.json(result.rows);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Błąd pobierania miejsc' });
+  }
+});
+
+app.get('/api/days', async (req, res) => {
+  const result = await pool.query('SELECT * FROM days ORDER BY id LIMIT 15');
+  res.json(result.rows);
+});
+
 
 // Rezerwacja / zwolnienie miejsca
 app.post('/api/book/:dayId/:seatId', async (req, res) => {
@@ -149,4 +162,5 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
   console.log(`Serwer uruchomiony na http://localhost:${port}`);
 });
+
 
