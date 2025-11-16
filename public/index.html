@@ -256,11 +256,10 @@ document.querySelectorAll('.seat').forEach(seat => {
   seatElements[seatId] = seat;
 });
 
-// Функция обработчика клика по месту
+// Обработчик клика по месту
 function seatClickHandler(seatDiv, seatId) {
   return async () => {
-    // блокируем кнопку пока идёт запрос
-    seatDiv.onclick = null;
+    seatDiv.onclick = null; // блокировка
     try {
       const res = await fetch(`/api/book/${currentDayId}/${seatId}`, { method: 'POST' });
       const data = await res.json();
@@ -277,14 +276,11 @@ function seatClickHandler(seatDiv, seatId) {
 // Загрузка мест для выбранного дня
 async function loadSeatsForDay(dayId) {
   currentDayId = dayId;
-
   const res = await fetch(`/api/seats/${dayId}`);
   const seats = await res.json();
 
-  // Сбрасываем все DOM-брони
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
 
-  // Устанавливаем бронь из БД
   seats.forEach(seat => {
     const seatDiv = seatElements[seat.id];
     if (seatDiv) {
@@ -313,7 +309,7 @@ document.getElementById('reset-button').onclick = async () => {
   }
 };
 
-// Загрузка дней и генерация кнопок
+// Генерация кнопок дней (15 дней)
 async function loadDayNames() {
   const res = await fetch('/api/days');
   const days = await res.json();
@@ -345,7 +341,7 @@ async function renameDay() {
   document.getElementById('day-title').textContent = newName;
 }
 
-// Инициализация при загрузке страницы
+// Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
   await loadDayNames();       // создаём 15 кнопок дней
   await loadSeatsForDay(1);   // загружаем места для 1 дня
