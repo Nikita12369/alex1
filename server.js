@@ -45,12 +45,14 @@ async function initDatabase() {
     );
   `);
 
-  // 3) Вставляем дни (1..15), если их нет
-  await pool.query(`
-    INSERT INTO days (name)
-    SELECT 'День ' || generate_series(1, 15)
-    ON CONFLICT DO NOTHING;
-  `);
+  // Создать только один раз 15 дней 
+  const daysCount = await pool.query(`SELECT COUNT(*) FROM days`);
+  if (parseInt(daysCount.rows[0].count, 10) === 0) {
+    await pool.query(`
+      INSERT INTO days (name)
+      SELECT 'День ' || generate_series(1, 15);
+    `);
+  }
 
   // 4) Если таблица seats пуста — создаём по 300 мест на каждый день
   const { rows } = await pool.query(`SELECT COUNT(*) FROM seats`);
