@@ -260,6 +260,15 @@ document.querySelectorAll('.seat').forEach(seat => {
 // Обработчик клика по месту
 function seatClickHandler(seatDiv, seatNumber) {
   return async () => {
+    const isBooked = seatDiv.classList.contains("booked");
+
+    // Если место занято → спросить подтверждение
+    if (isBooked) {
+      const confirmUnbook = confirm("Вы точно хотите снять бронь с этого места?");
+      if (!confirmUnbook) return; // если нажали "Отмена"
+    }
+
+    // Блокируем повторный клик
     seatDiv.onclick = null;
 
     try {
