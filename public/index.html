@@ -269,7 +269,7 @@ function seatClickHandler(seatDiv, seatNumber) {
       alert("Ошибка сервера");
     }
 
-    seatDiv.onclick = seatClickHandler(seatDiv, seatNumber);
+    seatDiv.onclick = seatClickHandler(seatDiv, seat.seat_number);
   };
 }
 
