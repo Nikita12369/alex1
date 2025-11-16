@@ -114,7 +114,7 @@ app.get('/api/seats/:dayId', async (req, res) => {
 // Забронировать/разбронировать место
 app.post('/api/book/:dayId/:seatNumber', async (req, res) => {
   const dayId = parseInt(req.params.dayId);
-  const seatId = parseInt(req.params.seatNumber);
+  const seatNumber = parseInt(req.params.seatNumber);
 
   try {
     // Ищем место по day_id + seat_number
