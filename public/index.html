@@ -253,24 +253,23 @@ let currentDayId = 1;
 
 // Инициализация seatElements при загрузке арены
 document.querySelectorAll('.seat').forEach(seat => {
-  const seatNumber = parseInt(seat.title.replace('Место ', ''));
+  const seatNumber = parseInt(seat.dataset.seatNumber);
   seatElements[seatNumber] = seat;
 });
 
 // Обработчик клика по месту
 function seatClickHandler(seatDiv, seatNumber) {
   return async () => {
-    seatDiv.onclick = null; // блокировка
+    seatDiv.onclick = null;
+
     try {
-      const res = await fetch(`/api/book/${currentDayId}/${seatNumber}`, { method: 'POST' });
-      const data = await res.json();
-      if (!data.success) alert('Ошибка бронирования');
+      await fetch(`/api/book/${currentDayId}/${seatNumber}`, { method: 'POST' });
     } catch (err) {
       console.error(err);
-      alert('Ошибка соединения с сервером');
-    } finally {
-      seatDiv.onclick = seatClickHandler(seatDiv, seatNumber);
+      alert("Ошибка сервера");
     }
+
+    seatDiv.onclick = seatClickHandler(seatDiv, seatNumber);
   };
 }
 
@@ -283,18 +282,18 @@ async function loadSeatsForDay(dayId) {
   Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
 
   seats.forEach(seat => {
-    const seatDiv = seatElements[seat.id];
+    const seatDiv = seatElements[seat.seat_number];
     if (seatDiv) {
       seatDiv.classList.toggle('booked', seat.taken);
-      seatDiv.onclick = seatClickHandler(seatDiv, seat.id);
+      seatDiv.onclick = seatClickHandler(seatDiv, seat_number);
     }
   });
 }
 
 // WebSocket обновления
-socket.on('seat-updated', ({ id, taken, dayId }) => {
+socket.on('seat-updated', ({ seatNumber, taken, dayId }) => {
   if (dayId !== currentDayId) return;
-  const seat = seatElements[id];
+  const seat = seatElements[seatNumber];
   if (seat) seat.classList.toggle('booked', taken);
 });
 
@@ -349,108 +348,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   socket.emit('get-seats', 1);
 });
 </script>
-
-<script>
-
-
-
-// Загрузка мест при выборе дня
-async function loadSeatsForDay(dayId) {
-  currentDayId = dayId;
-
-  // Получаем все места с сервера для этого дня
-  const res = await fetch(`/api/seats/${dayId}`);
-  const seats = await res.json();
-
-  // Обновляем статус DOM
-  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
-
-  seats.forEach(seat => {
-    const seatDiv = seatElements[seat.id];
-    if (seatDiv) {
-      seatDiv.classList.toggle('booked', seat.taken);
-      seatDiv.onclick = async () => {
-        // Блокируем кнопку сразу
-        seatDiv.onclick = null;
-
-        const res = await fetch(`/api/book/${dayId}/${seat.id}`, {
-          method: 'POST'
-        });
-        const data = await res.json();
-        if (!data.success) {
-          alert('Ошибка бронирования');
-          seatDiv.onclick = arguments.callee; // возвращаем обработчик
-        }
-      };
-    }
-  });
-}
-
-// Инициализация seatElements при первой загрузке арены
-document.querySelectorAll('.seat').forEach(seat => {
-  const seatNumber = parseInt(seat.title.replace('Место ', ''));
-  seatElements[seatNumber] = seat;
-});
-
-// События WebSocket
-socket.on('seat-updated', ({ id, taken, dayId }) => {
-  if (dayId !== currentDayId) return; // обновляем только текущий день
-  const seat = seatElements[id];
-  if (seat) seat.classList.toggle('booked', taken);
-});
-
-socket.on('seats-reset', ({ dayId }) => {
-  if (dayId !== currentDayId) return;
-  Object.values(seatElements).forEach(seat => seat.classList.remove('booked'));
-});
-
-// Кнопка сброса
-document.getElementById('reset-button').onclick = async () => {
-  if (confirm('Очистить все брони?')) {
-    await fetch(`/api/reset/${currentDayId}`, { method: 'POST' });
-  }
-};
-
-// Генерация кнопок дней
-async function loadDayNames() {
-  const res = await fetch('/api/days');
-  const days = await res.json();
-  const container = document.getElementById('days-container');
-  container.innerHTML = '';
-  days.forEach(day => {
-    const btn = document.createElement('button');
-    btn.className = 'tab-button';
-    btn.textContent = day.name;
-    btn.onclick = () => {
-      document.getElementById('day-title').textContent = day.name;
-      loadSeatsForDay(day.id);
-    };
-    container.appendChild(btn);
-  });
-}
-
-// Переименование дня
-async function renameDay() {
-  const newName = document.getElementById('rename-input').value.trim();
-  if (!newName) return alert('Введите название');
-  await fetch(`/api/rename-day/${currentDayId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: newName })
-  });
-  await loadDayNames();
-  document.getElementById('day-title').textContent = newName;
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadDayNames();
-  loadSeatsForDay(currentDayId);
-  socket.emit('get-seats', currentDayId);
-});
-</script>
-
-
 
 
 </body>
