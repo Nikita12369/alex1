@@ -166,19 +166,20 @@
           seat.className = `seat ${rank}`;
           seat.style.left = `${x}px`;
           seat.style.top = `${y}px`;
+          seat.dataset.seatNumber = id;
           seat.title = `Место ${id}`;
 
           seat.onclick = async () => {
-          const seatId = id;
+          const seatNumber = id;
 
           if (seat.classList.contains('booked')) {
             if (confirm('Снять бронь с этого места?')) {
               seat.classList.remove('booked');
-              await updateBookingOnServer(seatId, false);
+              await updateBookingOnServer(seatNumber, false);
             }
           } else {
             seat.classList.add('booked');
-            await updateBookingOnServer(seatId, true);
+            await updateBookingOnServer(seatNumber, true);
           }
         };
 
@@ -217,28 +218,28 @@
 
       
       function drawManualDividers() {
-  const dividers = [
-    // Между жёлтыми секторами
-    { x: 165, y: 483, rotate: 240 }, // 1-2 слева
-    { x: 165, y: 218, rotate: 120 },   // 2-3 желтый зелёный слева
-    { x: 300, y: 90, rotate: 160 },  // закулисье слева
-    { x: 505, y: 90, rotate: 200 },  // закулисье справа
-    { x: 635, y: 218, rotate: 65 },  // желтый зелёный справа
-    { x: 635, y: 483, rotate: -240 }, // желтый справа
+        const dividers = [
+          // Между жёлтыми секторами
+          { x: 165, y: 483, rotate: 240 }, // 1-2 слева
+          { x: 165, y: 218, rotate: 120 },   // 2-3 желтый зелёный слева
+          { x: 300, y: 90, rotate: 160 },  // закулисье слева
+          { x: 505, y: 90, rotate: 200 },  // закулисье справа
+          { x: 635, y: 218, rotate: 65 },  // желтый зелёный справа
+          { x: 635, y: 483, rotate: -240 }, // желтый справа
 
-    { x: 335, y: 610, rotate: 15 }, // слева сход
-    { x: 465, y: 610, rotate: -15 },  // правый вход
-  ];
+          { x: 335, y: 610, rotate: 15 }, // слева сход
+          { x: 465, y: 610, rotate: -15 },  // правый вход
+        ];
 
-  dividers.forEach(d => {
-    const line = document.createElement('div');
-    line.className = 'divider-line';
-    line.style.left = `${d.x}px`;
-    line.style.top = `${d.y}px`;
-    line.style.transform = `rotate(${d.rotate}deg)`;
-    arena.appendChild(line);
-  });
-}
+        dividers.forEach(d => {
+          const line = document.createElement('div');
+          line.className = 'divider-line';
+          line.style.left = `${d.x}px`;
+          line.style.top = `${d.y}px`;
+          line.style.transform = `rotate(${d.rotate}deg)`;
+          arena.appendChild(line);
+        });
+      }
 
 drawManualDividers();
 </script>
@@ -252,23 +253,23 @@ let currentDayId = 1;
 
 // Инициализация seatElements при загрузке арены
 document.querySelectorAll('.seat').forEach(seat => {
-  const seatId = parseInt(seat.title.replace('Место ', ''));
-  seatElements[seatId] = seat;
+  const seatNumber = parseInt(seat.title.replace('Место ', ''));
+  seatElements[seatNumber] = seat;
 });
 
 // Обработчик клика по месту
-function seatClickHandler(seatDiv, seatId) {
+function seatClickHandler(seatDiv, seatNumber) {
   return async () => {
     seatDiv.onclick = null; // блокировка
     try {
-      const res = await fetch(`/api/book/${currentDayId}/${seatId}`, { method: 'POST' });
+      const res = await fetch(`/api/book/${currentDayId}/${seatNumber}`, { method: 'POST' });
       const data = await res.json();
       if (!data.success) alert('Ошибка бронирования');
     } catch (err) {
       console.error(err);
       alert('Ошибка соединения с сервером');
     } finally {
-      seatDiv.onclick = seatClickHandler(seatDiv, seatId);
+      seatDiv.onclick = seatClickHandler(seatDiv, seatNumber);
     }
   };
 }
@@ -387,8 +388,8 @@ async function loadSeatsForDay(dayId) {
 
 // Инициализация seatElements при первой загрузке арены
 document.querySelectorAll('.seat').forEach(seat => {
-  const seatId = parseInt(seat.title.replace('Место ', ''));
-  seatElements[seatId] = seat;
+  const seatNumber = parseInt(seat.title.replace('Место ', ''));
+  seatElements[seatNumber] = seat;
 });
 
 // События WebSocket
