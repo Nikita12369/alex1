@@ -269,7 +269,7 @@ function seatClickHandler(seatDiv, seatNumber) {
       alert("Ошибка сервера");
     }
 
-    seatDiv.onclick = seatClickHandler(seatDiv, seat.seat_number);
+    seatDiv.onclick = seatClickHandler(seatDiv, seatNumber);
   };
 }
 
@@ -285,7 +285,7 @@ async function loadSeatsForDay(dayId) {
     const seatDiv = seatElements[seat.seat_number];
     if (seatDiv) {
       seatDiv.classList.toggle('booked', seat.taken);
-      seatDiv.onclick = seatClickHandler(seatDiv, seat_number);
+      seatDiv.onclick = seatClickHandler(seatDiv, seat.seat_number);
     }
   });
 }
