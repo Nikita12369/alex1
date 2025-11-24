@@ -19,6 +19,7 @@
 
   <div id="days-container" style="margin-bottom: 20px;">
 </div>
+<h2 id="day-title">Tag 1</h2>
 
 <button class="pretty-btn active">Tag 1</button>
 <input type="text" id="rename-input" placeholder="Neuer Tagesname">
@@ -287,7 +288,7 @@ async function loadDayNames() {
   container.innerHTML = '';
   days.forEach(day => {
     const btn = document.createElement('button');
-    btn.className = 'tab-button';
+    btn.className = 'pretty-btn';
     btn.textContent = day.name;
     btn.onclick = () => {
       currentDayId = day.id;
