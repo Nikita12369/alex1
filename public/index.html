@@ -135,8 +135,6 @@
         arena.appendChild(seat);
       }
     });
-
-    console.log("ИТОГО МЕСТ:", total);
   }
 
   function drawRank2Left_532() {
@@ -149,7 +147,7 @@
       radii.push(r);
     }
 
-    drawExactSeats(start, end, radii, 'rank-2', '2ранг', 532);
+    drawExactSeats(start, end, radii, 'rank-1', '1 rang', 532);
   }
 
   function drawRank2Right_532() {
@@ -162,7 +160,7 @@
       radii.push(r);
     }
 
-    drawExactSeats(start, end, radii, 'rank-2', '2ранг', 532);
+    drawExactSeats(start, end, radii, 'rank-1', '1 rang', 532);
   }
 
   function drawRank3Left_71() {
@@ -175,7 +173,7 @@
       radii.push(r);
     }
 
-    drawExactSeats(start, end, radii, 'rank-3', '3ранг', 71);
+    drawExactSeats(start, end, radii, 'rank-2', '2 rang', 71);
   }
 
   function drawRank3Right_71() {
@@ -187,15 +185,15 @@
     for (let r = 280; r <= 520; r += 15) {
       radii.push(r);
     }
-    drawExactSeats(start, end, radii, 'rank-3', '3ранг', 71);
+    drawExactSeats(start, end, radii, 'rank-2', '2 rang', 71);
   }
 
-  drawSectorSeats(VIP_START, VIP_END, VIP_ROWS, VIP_PER_ROW, VIP_RADII, 'vip-seat', 'VIP');
+  drawSectorSeats(VIP_START, VIP_END, VIP_ROWS, VIP_PER_ROW, VIP_RADII, 'vip-seat', 'VIP LOGE');
 
 
-  drawSectorSeats(LEFT_START, LEFT_END, RANK_ROWS, RANK_PER_ROW, LEFT_RADII, 'rank-1', '1ранг');
+  drawSectorSeats(LEFT_START, LEFT_END, RANK_ROWS, RANK_PER_ROW, LEFT_RADII, 'loge', 'Loge');
 
-  drawSectorSeats(RIGHT_START, RIGHT_END, RANK_ROWS, RANK_PER_ROW, RIGHT_RADII, 'rank-1', '1ранг');
+  drawSectorSeats(RIGHT_START, RIGHT_END, RANK_ROWS, RANK_PER_ROW, RIGHT_RADII, 'loge', 'Loge');
 
   drawRank2Left_532();
   drawRank2Right_532();
@@ -291,6 +289,13 @@ async function loadDayNames() {
     btn.onclick = () => {
       currentDayId = day.id;
       document.getElementById('day-title').textContent = day.name;
+
+      document.querySelectorAll('.day-button').forEach(b =>
+        b.classList.remove('active')
+      );
+
+      btn.classList.add('active');
+      
       loadSeatsForDay(day.id);
     };
     container.appendChild(btn);

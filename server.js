@@ -50,18 +50,18 @@ async function initDatabase() {
   if (parseInt(daysCount.rows[0].count, 10) === 0) {
     await pool.query(`
       INSERT INTO days (name)
-      SELECT 'День ' || generate_series(1, 15);
+      SELECT 'Tag ' || generate_series(1, 26);
     `);
   }
 
-  // 4) Если таблица seats пуста — создаём по 300 мест на каждый день
+  // 4) Если таблица seats пуста — создаём по 1506 мест на каждый день
   const { rows } = await pool.query(`SELECT COUNT(*) FROM seats`);
   if (parseInt(rows[0].count, 10) === 0) {
     const daysRes = await pool.query(`SELECT id FROM days ORDER BY id`);
     for (const d of daysRes.rows) {
       const dayId = d.id;
       // создаём VALUES вида: (dayId, 1, false), (dayId, 2, false), ... (dayId, 300, false)
-      const values = Array.from({ length: 300 }, (_, i) => `(${dayId}, ${i + 1}, false)`).join(',');
+      const values = Array.from({ length: 1506 }, (_, i) => `(${dayId}, ${i + 1}, false)`).join(',');
       await pool.query(`INSERT INTO seats (day_id, seat_number, taken) VALUES ${values}`);
     }
   }
