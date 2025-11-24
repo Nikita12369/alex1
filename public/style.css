@@ -22,6 +22,16 @@ body {
   text-align: center;
 }
 
+.circus-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 48px;
+  color: #ffdfc4;
+  text-shadow: 
+      0 0 10px rgba(255,150,80,0.6),
+      0 0 25px rgba(255,80,50,0.6);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
 
 #arena {
   position: relative;
@@ -190,10 +200,20 @@ body {
 }
 
 #day-title {
-  font-size: 30px;
-  font-weight: bold;
-  color: #ff5b5b;
-  text-shadow: 0 0 12px rgba(255, 70, 70, 0.5);
+  font-size: 28px;
+  font-weight: 700;
+  margin: 20px 0 10px;
+
+  color: #ffb8b8;
+  letter-spacing: 1.2px;
+
+  text-shadow:
+    0 0 6px rgba(255, 120, 120, 0.4),
+    0 0 12px rgba(255, 80, 80, 0.3);
+
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 120, 120, 0.25);
+  display: inline-block;
 }
 
 #stats-box {
