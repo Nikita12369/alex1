@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="author" content="Nikita Khistov">
   <link rel="stylesheet" href="style.css">
-  <title>Цирковая арена</title>
+  <title>ZIRKUSARENA</title>
 </head>
 <body>
   <h1>Zirkusarena</h1>
@@ -26,7 +27,7 @@
 
 <script>
   const arena = document.getElementById('arena');
-  const cx = 500, cy = 500;   // центр арены (px)
+  const cx = 500, cy = 500;
   let seatId = 1;
 
   const VIP_START = 30;
@@ -210,24 +211,20 @@ const socket = io();
 const seatElements = {};
 let currentDayId = 1;
 
-// Инициализация seatElements при загрузке арены
 document.querySelectorAll('.seat').forEach(seat => {
   const seatNumber = parseInt(seat.dataset.seatNumber);
   seatElements[seatNumber] = seat;
 });
 
-// Обработчик клика по месту
 function seatClickHandler(seatDiv, seatNumber) {
   return async () => {
     const isBooked = seatDiv.classList.contains("booked");
 
-    // Если место занято → спросить подтверждение
     if (isBooked) {
-      const confirmUnbook = confirm("Вы точно хотите снять бронь с этого места?");
-      if (!confirmUnbook) return; // если нажали "Отмена"
+      const confirmUnbook = confirm("Möchten Sie die Reservierung für diesen Platz wirklich aufheben?");
+      if (!confirmUnbook) return;
     }
 
-    // Блокируем повторный клик
     seatDiv.onclick = null;
 
     try {
@@ -241,7 +238,6 @@ function seatClickHandler(seatDiv, seatNumber) {
   };
 }
 
-// Загрузка мест для выбранного дня
 async function loadSeatsForDay(dayId) {
   currentDayId = dayId;
   const res = await fetch(`/api/seats/${dayId}`);
@@ -259,7 +255,6 @@ async function loadSeatsForDay(dayId) {
   updateStats();
 }
 
-// WebSocket обновления
 socket.on('seat-updated', ({ seatNumber, taken, dayId }) => {
   if (dayId !== currentDayId) return;
   const seat = seatElements[seatNumber];
@@ -273,14 +268,12 @@ socket.on('seats-reset', ({ dayId }) => {
   updateStats();
 });
 
-// Кнопка сброса брони
 document.getElementById('reset-button').onclick = async () => {
-  if (confirm('Очистить все брони?')) {
+  if (confirm('Alle Reservierungen löschen?')) {
     await fetch(`/api/reset/${currentDayId}`, { method: 'POST' });
   }
 };
 
-// Генерация кнопок дней (15 дней)
 async function loadDayNames() {
   const res = await fetch('/api/days');
   const days = await res.json();
@@ -306,10 +299,9 @@ async function loadDayNames() {
   });
 }
 
-// Переименование дня
 async function renameDay() {
   const newName = document.getElementById('rename-input').value.trim();
-  if (!newName) return alert('Введите название');
+  if (!newName) return alert('Name eingeben');
   await fetch(`/api/rename-day/${currentDayId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -319,10 +311,10 @@ async function renameDay() {
   document.getElementById('day-title').textContent = newName;
 }
 
-// Инициализация
+
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadDayNames();       // создаём 15 кнопок дней
-  await loadSeatsForDay(1);   // загружаем места для 1 дня
+  await loadDayNames();
+  await loadSeatsForDay(1);
   socket.emit('get-seats', 1);
   updateStats();
 });
@@ -335,25 +327,21 @@ function updateStats() {
   Object.values(seatElements).forEach(seat => {
     const num = Number(seat.dataset.seatNumber);
 
-    // VIP → 1–100
     if (num >= 1 && num <= 100) {
       vipTotal++;
       if (seat.classList.contains("booked")) vip++;
     }
 
-    // Loge → 101–300
     else if (num >= 101 && num <= 300) {
       logeTotal++;
       if (seat.classList.contains("booked")) loge++;
     }
 
-    // 1 Rang → 301–1364 (примерно)
     else if (num >= 301 && num <= 1364) {
       r1Total++;
       if (seat.classList.contains("booked")) r1++;
     }
 
-    // 2 Rang → 1365–1506
     else if (num >= 1365 && num <= 1506) {
       r2Total++;
       if (seat.classList.contains("booked")) r2++;

@@ -10,7 +10,6 @@ const io = socketIO(server);
 
 const port = process.env.PORT || 3000;
 
-// Подключение к PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://db_circus_user:3eQjdQwejW92UBLMa8Uhz1cR6FAtX2P2@dpg-d475ehmmcj7s73d5sru0-a.oregon-postgres.render.com/db_circus',
   ssl: { rejectUnauthorized: false }
@@ -19,15 +18,7 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-/*
-  initDatabase:
-  - создаёт таблицы days и seats (если их нет)
-  - вставляет 15 дней (День 1..День 15) при отсутствии
-  - если seats пустая — создаёт по 300 мест на каждый день (seat_number 1..300)
-  - создаёт уникальный индекс (day_id, seat_number)
-*/
 async function initDatabase() {
-  // 1) Создаём таблицу days
   await pool.query(`
     CREATE TABLE IF NOT EXISTS days (
       id SERIAL PRIMARY KEY,
@@ -35,7 +26,6 @@ async function initDatabase() {
     );
   `);
 
-  // 2) Создаём таблицу seats (с колонкой seat_number)
   await pool.query(`
     CREATE TABLE IF NOT EXISTS seats (
       id SERIAL PRIMARY KEY,
@@ -45,7 +35,6 @@ async function initDatabase() {
     );
   `);
 
-  // Создать только один раз 15 дней 
   const daysCount = await pool.query(`SELECT COUNT(*) FROM days`);
   if (parseInt(daysCount.rows[0].count, 10) === 0) {
     await pool.query(`
@@ -54,19 +43,16 @@ async function initDatabase() {
     `);
   }
 
-  // 4) Если таблица seats пуста — создаём по 1506 мест на каждый день
   const { rows } = await pool.query(`SELECT COUNT(*) FROM seats`);
   if (parseInt(rows[0].count, 10) === 0) {
     const daysRes = await pool.query(`SELECT id FROM days ORDER BY id`);
     for (const d of daysRes.rows) {
       const dayId = d.id;
-      // создаём VALUES вида: (dayId, 1, false), (dayId, 2, false), ... (dayId, 300, false)
       const values = Array.from({ length: 1506 }, (_, i) => `(${dayId}, ${i + 1}, false)`).join(',');
       await pool.query(`INSERT INTO seats (day_id, seat_number, taken) VALUES ${values}`);
     }
   }
 
-  // 5) Создаём уникальный индекс на (day_id, seat_number) если его нет
   await pool.query(`
     DO $$
     BEGIN
@@ -86,20 +72,12 @@ async function initDatabase() {
 
 initDatabase().catch(console.error);
 
-/*
-===============================================================
-  API: получить список дней
-===============================================================
-*/
+
 app.get('/api/days', async (req, res) => {
   const result = await pool.query(`SELECT * FROM days ORDER BY id`);
   res.json(result.rows);
 });
 
-/*===============================================================
-  API: получить все места для дня
-===============================================================
-*/
 app.get('/api/seats/:dayId', async (req, res) => {
   const dayId = parseInt(req.params.dayId);
 
@@ -113,13 +91,11 @@ app.get('/api/seats/:dayId', async (req, res) => {
   res.json(result.rows);
 });
 
-// Забронировать/разбронировать место
 app.post('/api/book/:dayId/:seatNumber', async (req, res) => {
   const dayId = parseInt(req.params.dayId);
   const seatNumber = parseInt(req.params.seatNumber);
 
   try {
-    // Ищем место по day_id + seat_number
     const result = await pool.query(`
       SELECT id, taken
       FROM seats
@@ -133,7 +109,6 @@ app.post('/api/book/:dayId/:seatNumber', async (req, res) => {
     const seat = result.rows[0];
     const newTaken = !seat.taken;
 
-    // Обновляем статус
     const update = await pool.query(`
       UPDATE seats
       SET taken = $1
@@ -143,7 +118,6 @@ app.post('/api/book/:dayId/:seatNumber', async (req, res) => {
 
     const updated = update.rows[0];
 
-    // Сообщаем всем клиентам
     io.emit("seat-updated", {
       dayId: updated.day_id,
       seatNumber: updated.seat_number,
@@ -158,11 +132,6 @@ app.post('/api/book/:dayId/:seatNumber', async (req, res) => {
   }
 });
 
-/*
-===============================================================
-  API: сбросить все места дня
-===============================================================
-*/
 app.post('/api/reset/:dayId', async (req, res) => {
   const dayId = parseInt(req.params.dayId);
 
@@ -177,11 +146,6 @@ app.post('/api/reset/:dayId', async (req, res) => {
   res.json({ message: "Все брони сняты" });
 });
 
-/*
-===============================================================
-  API: переименовать день
-===============================================================
-*/
 app.post('/api/rename-day/:id', async (req, res) => {
   const dayId = parseInt(req.params.id);
   const { name } = req.body;
@@ -195,11 +159,6 @@ app.post('/api/rename-day/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-/*
-===============================================================
-  WebSocket
-===============================================================
-*/
 io.on("connection", (socket) => {
   console.log("Подключился клиент:", socket.id);
 

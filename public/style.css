@@ -1,12 +1,9 @@
-    /* ======= ГЛОБАЛЬНЫЙ СТИЛЬ СТРАНИЦЫ ======= */
 body {
   font-family: "Segoe UI", sans-serif;
 
   background:
-    /* винтажное мягкое освещение сверху */
     radial-gradient(circle at 50% 8%, rgba(180, 130, 180, 0.2), transparent 40%),
 
-    /* старинные текстильные полосы */
     repeating-linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.015) 0px,
@@ -15,7 +12,6 @@ body {
       rgba(0, 0, 0, 0.04) 6px
     ),
 
-    /* основной винтажный центровой фон */
     linear-gradient(180deg, #3b1e3a 0%, #281226 45%, #120813 100%);
 
   background-blend-mode: overlay, soft-light, normal;
@@ -27,7 +23,6 @@ body {
 }
 
 
-/* ======= УНИВЕРСАЛЬНАЯ ТЕНИСТАЯ КАРТА ======= */
 #arena {
   position: relative;
   width: 1000px;
@@ -60,7 +55,6 @@ body {
   margin-top: 10px;
 }
 
-/* ======= СИДЕНИЯ ======= */
 .seat {
   position: absolute;
   width: 14px;
@@ -71,7 +65,6 @@ body {
   transition: 0.15s ease-in-out;
 }
 
-/* ===== VIP ===== */
 .vip-seat {
   background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
   border: 2px solid #6f6f6f;
@@ -83,7 +76,6 @@ body {
     inset 0 0 4px rgba(255,255,255,0.6);
 }
 
-/* ===== РАНГИ ===== */
 .loge {
   background: #d62828;
   box-shadow: 0 0 4px rgba(255, 80, 80, 0.6);
@@ -99,13 +91,11 @@ body {
   box-shadow: 0 0 4px rgba(50, 200, 80, 0.6);
 }
 
-/* Занято */
 .booked {
   background: yellow !important;
   border-color: goldenrod !important;
 }
 
-/* ======= МАНЕЖ ======= */
 #center {
   position: absolute;
   width: 320px;
@@ -123,13 +113,12 @@ body {
     inset 0 0 30px rgba(0, 0, 0, 0.2);
 }
 
-/* ======= ВХОД И ЗАКУЛИСЬЕ ======= */
 
 #entrance {
   position: absolute;
   top: 10px;
   left: 50%;
-  transform: translateX(-50%); /* по центру */
+  transform: translateX(-50%);
 
 
   color: white;
@@ -141,7 +130,7 @@ body {
   position: absolute;
   top: 950px;
   left: 50%;
-  transform: translateX(-50%); /* по центру */
+  transform: translateX(-50%);
 
 
   color: white;
@@ -149,7 +138,6 @@ body {
   font-weight: bold;
 }
 
-/* ======= ВЕРХНЯЯ ПАНЕЛЬ ======= */
 #top-bar {
   width: 900px;
   display: flex;
@@ -159,7 +147,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* ======= КРАСИВЫЕ КНОПКИ ======= */
 .day-button {
   margin: 4px 6px;
   background: linear-gradient(135deg, #ff3c3c, #b30000);
@@ -185,8 +172,6 @@ body {
   box-shadow: 0 0 12px rgba(255, 230, 120, 0.8);
 }
 
-
-/* ======= Поле ввода ======= */
 #rename-input {
   padding: 10px 14px;
   border-radius: 10px;
@@ -204,7 +189,6 @@ body {
   box-shadow: 0 0 10px rgba(255, 80, 80, 0.6);
 }
 
-/* Заголовок дня */
 #day-title {
   font-size: 30px;
   font-weight: bold;
@@ -212,7 +196,6 @@ body {
   text-shadow: 0 0 12px rgba(255, 70, 70, 0.5);
 }
 
-/* ---- БЛОК СТАТИСТИКИ ---- */
 #stats-box {
   width: 1000px;
   margin: 35px auto 0;
@@ -234,7 +217,6 @@ body {
   backdrop-filter: blur(4px);
 }
 
-/* Один элемент статистики */
 .stat-item {
   display: flex;
   flex-direction: column;
@@ -242,7 +224,6 @@ body {
   gap: 6px;
 }
 
-/* Название */
 .stat-label {
   font-size: 16px;
   font-weight: 600;
@@ -250,7 +231,6 @@ body {
   letter-spacing: 0.4px;
 }
 
-/* Значение */
 .stat-value {
   font-size: 20px;
   font-weight: 800;
