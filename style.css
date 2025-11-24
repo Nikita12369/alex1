@@ -1,0 +1,201 @@
+    /* ======= ГЛОБАЛЬНЫЙ СТИЛЬ СТРАНИЦЫ ======= */
+body {
+  font-family: "Segoe UI", sans-serif;
+
+  background:
+    /* винтажное мягкое освещение сверху */
+    radial-gradient(circle at 50% 8%, rgba(180, 130, 180, 0.2), transparent 40%),
+
+    /* старинные текстильные полосы */
+    repeating-linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 2px,
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 6px
+    ),
+
+    /* основной винтажный центровой фон */
+    linear-gradient(180deg, #3b1e3a 0%, #281226 45%, #120813 100%);
+
+  background-blend-mode: overlay, soft-light, normal;
+
+  color: #f2f2f2;
+  margin: 0;
+  padding: 30px 0;
+  text-align: center;
+}
+
+
+/* ======= УНИВЕРСАЛЬНАЯ ТЕНИСТАЯ КАРТА ======= */
+#arena {
+  position: relative;
+  width: 1000px;
+  height: 1000px;
+  margin: 40px auto;
+  background:
+    radial-gradient(circle at center, #4f1d1d 40%, #1b0a0a 85%, #000 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 60px rgba(200, 0, 0, 0.25),
+    inset 0 0 80px rgba(0, 0, 0, 0.75),
+    0 0 160px rgba(180, 30, 30, 0.15);
+  border: 4px solid rgba(160, 60, 60, 0.4);
+}
+
+/* ======= СИДЕНИЯ ======= */
+.seat {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 2px solid #000;
+  cursor: pointer;
+  transition: 0.15s ease-in-out;
+}
+
+.seat:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 6px #fff;
+  z-index: 999;
+}
+
+/* ===== VIP ===== */
+.vip-seat {
+  background: linear-gradient(135deg, #ffe56a, #ffbd00);
+  border: 2px solid #9e7700;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  box-shadow:
+    0 0 12px rgba(255, 200, 0, 0.7),
+    inset 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+/* ===== РАНГИ ===== */
+.rank-1 {
+  background: #d62828;
+  box-shadow: 0 0 4px rgba(255, 80, 80, 0.6);
+}
+
+.rank-2 {
+  background: #155bff;
+  box-shadow: 0 0 4px rgba(60, 130, 255, 0.6);
+}
+
+.rank-3 {
+  background: #1fad3b;
+  box-shadow: 0 0 4px rgba(50, 200, 80, 0.6);
+}
+
+/* Занято */
+.booked {
+  background: yellow !important;
+  border-color: goldenrod !important;
+}
+
+/* ======= МАНЕЖ ======= */
+#center {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  top: 335px;
+  left: 340px;
+  background: radial-gradient(circle, #fff 40%, #ddd 100%);
+  border-radius: 50%;
+  line-height: 320px;
+  font-size: 36px;
+  color: #333;
+  font-weight: bold;
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.2);
+}
+
+/* ======= ВХОД И ЗАКУЛИСЬЕ ======= */
+
+#entrance {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%); /* по центру */
+
+
+  color: white;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+#backstage {
+  position: absolute;
+  top: 950px;
+  left: 50%;
+  transform: translateX(-50%); /* по центру */
+
+
+  color: white;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+/* ======= ВЕРХНЯЯ ПАНЕЛЬ ======= */
+#top-bar {
+  width: 900px;
+  display: flex;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* ======= КРАСИВЫЕ КНОПКИ ======= */
+.pretty-btn {
+  background: linear-gradient(135deg, #ff3c3c, #b30000);
+  padding: 12px 26px;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.45);
+  transition: 0.2s;
+}
+
+.pretty-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(255, 50, 50, 0.6);
+}
+
+/* ======= Поле ввода ======= */
+#rename-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid #ff4949;
+  background: #111;
+  color: #fff;
+  outline: none;
+  width: 220px;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+#rename-input:focus {
+  border-color: #ff7777;
+  box-shadow: 0 0 10px rgba(255, 80, 80, 0.6);
+}
+
+/* Заголовок дня */
+#day-title {
+  font-size: 30px;
+  font-weight: bold;
+  color: #ff5b5b;
+  text-shadow: 0 0 12px rgba(255, 70, 70, 0.5);
+}
+
+/* Делители */
+.divider-line {
+  background: rgba(255, 255, 255, 0.5);
+  width: 3px;
+  border-radius: 3px;
+}
