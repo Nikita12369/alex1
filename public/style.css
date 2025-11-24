@@ -212,19 +212,55 @@ body {
   text-shadow: 0 0 12px rgba(255, 70, 70, 0.5);
 }
 
-#stats {
+/* ---- БЛОК СТАТИСТИКИ ---- */
+#stats-box {
   width: 1000px;
-  margin: 40px auto;
-  padding: 20px 0;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  color: #f3f3f3;
-  font-size: 20px;
-  letter-spacing: 0.4px;
-  text-align: center;
+  margin: 35px auto 0;
+  padding: 18px 25px;
+
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255, 120, 120, 0.15);
+  border-radius: 14px;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 20px;
+
+  box-shadow: 
+      0 0 18px rgba(0,0,0,0.55),
+      inset 0 0 20px rgba(0,0,0,0.35);
+
+  backdrop-filter: blur(4px);
 }
 
-.stat-line {
-  margin: 6px 0;
-  font-weight: 600;
-  text-shadow: 0 0 8px rgba(255,255,255,0.15);
+/* Один элемент статистики */
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
+
+/* Название */
+.stat-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffb2b2;
+  letter-spacing: 0.4px;
+}
+
+/* Значение */
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  padding: 4px 10px;
+
+  background: rgba(255, 80, 80, 0.22);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 120, 120, 0.25);
+
+  text-shadow: 0 0 4px rgba(255,255,255,0.35);
+}
+

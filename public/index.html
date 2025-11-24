@@ -256,6 +256,7 @@ async function loadSeatsForDay(dayId) {
       seatDiv.onclick = seatClickHandler(seatDiv, seat.seat_number);
     }
   });
+  updateStats();
 }
 
 // WebSocket обновления
@@ -367,11 +368,26 @@ function updateStats() {
 
 </script>
 
-<div id="stats">
-  <div class="stat-line" id="stat-vip">VIP LOGE – 0/0</div>
-  <div class="stat-line" id="stat-loge">Loge – 0/0</div>
-  <div class="stat-line" id="stat-r1">1 Rang – 0/0</div>
-  <div class="stat-line" id="stat-r2">2 Rang – 0/0</div>
+<div id="stats-box">
+  <div class="stat-item">
+    <span class="stat-label">VIP Loge</span>
+    <span id="stat-vip" class="stat-value">0/100</span>
+  </div>
+
+  <div class="stat-item">
+    <span class="stat-label">Loge</span>
+    <span id="stat-loge" class="stat-value">0/200</span>
+  </div>
+
+  <div class="stat-item">
+    <span class="stat-label">1. Rang</span>
+    <span id="stat-r1" class="stat-value">0/1064</span>
+  </div>
+
+  <div class="stat-item">
+    <span class="stat-label">2. Rang</span>
+    <span id="stat-r2" class="stat-value">0/142</span>
+  </div>
 </div>
 
 </body>
